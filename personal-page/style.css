@@ -1,0 +1,44 @@
+  body {                                                                                              
+   margin: 0;                                                                                          
+   font-family: Arial, sans-serif;                                                                     
+   background: linear-gradient(to right, #0f172a, #1e293b);                                            
+   color: white;                                                                                       
+   display: flex;                                                                                      
+   justify-content: center;                                                                            
+   align-items: center;                                                                                
+   height: 100vh;                                                                                      
+   }                                                                                                   
+                                                                                                       
+   .card {                                                                                             
+   background: rgba(255, 255, 255, 0.1);                                                               
+   padding: 30px;                                                                                      
+   border-radius: 20px;                                                                                
+   text-align: center;                                                                                 
+   width: 320px;                                                                                       
+   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);                                                         
+   }                                                                                                   
+                                                                                                       
+   h1 {                                                                                                
+   margin-bottom: 10px;                                                                                
+   }                                                                                                   
+                                                                                                       
+   p {                                                                                                 
+   font-size: 16px;                                                                                    
+   line-height: 1.5;                                                                                   
+   }                                                                                                   
+                                                                                                       
+   button {                                                                                            
+   margin-top: 20px;                                                                                   
+   padding: 12px 20px;                                                                                 
+   border: none;                                                                                       
+   border-radius: 10px;                                                                                
+   background: #38bdf8;                                                                                
+   color: #0f172a;                                                                                     
+   font-weight: bold;                                                                                  
+   cursor: pointer;                                                                                    
+   transition: 0.2s;                                                                                   
+   }                                                                                                   
+                                                                                                       
+   button:hover {                                                                                      
+   background: #7dd3fc;                                                                                
+   }                           
