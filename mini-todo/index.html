@@ -1,24 +1,32 @@
-   <!DOCTYPE html>                                                                                     
-   <html lang="en">                                                                                    
-   <head>                                                                                              
-   <meta charset="UTF-8" />                                                                            
-   <meta name="viewport" content="width=device-width, initial-scale=1.0" />                            
-   <title>Mini Todo</title>                                                                            
-   <link rel="stylesheet" href="style.css" />                                                          
-   </head>                                                                                             
-   <body>                                                                                              
-   <div class="todo-card">                                                                             
-   <h1>Mini Todo</h1>                                                                                  
-   <p>Write a task and add it to your list.</p>                                                        
-                                                                                                       
-   <div class="input-row">                                                                             
-   <input type="text" id="taskInput" placeholder="Enter a task..." />                                  
-   <button id="addButton">Add</button>                                                                 
-   </div>                                                                                              
-                                                                                                       
-   <ul id="taskList"></ul>                                                                             
-   </div>                                                                                              
-                                                                                                       
-   <script src="./script.js"></script>                                                                 
-   </body>                                                                                             
-   </html>  
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mini Todo</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="page">
+    <section class="todo-card">
+      <p class="eyebrow">Small project · Big upgrade</p>
+      <h1>Mini Todo</h1>
+      <p class="subtitle">Add tasks, mark them done, and keep the list under control.</p>
+
+      <div class="input-row">
+        <input type="text" id="taskInput" placeholder="Enter a task..." autocomplete="off" />
+        <button id="addButton" type="button">Add Task</button>
+      </div>
+
+      <div class="info-row">
+        <p id="taskCounter">0 total • 0 completed</p>
+      </div>
+
+      <p id="emptyState" class="empty-state">No tasks yet. Add one and get moving.</p>
+      <ul id="taskList" class="task-list"></ul>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

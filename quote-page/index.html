@@ -1,18 +1,24 @@
-  <!DOCTYPE html>                                                                                     
-   <html lang="en">                                                                                    
-   <head>                                                                                              
-   <meta charset="UTF-8" />                                                                            
-   <meta name="viewport" content="width=device-width, initial-scale=1.0" />                            
-   <title>Quote Page</title>                                                                           
-   <link rel="stylesheet" href="style.css" />                                                          
-   </head>                                                                                             
-   <body>                                                                                              
-   <div class="quote-card">                                                                            
-   <h1>Quote Page</h1>                                                                                 
-   <p id="quoteText">Click the button to get a quote.</p>                                              
-   <button id="quoteButton">New Quote</button>                                                         
-   </div>                                                                                              
-                                                                                                       
-   <script src="./script.js"></script>                                                                 
-   </body>                                                                                             
-   </html>          
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quote Page</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="page">
+    <section class="quote-card">
+      <p class="eyebrow">Daily Motivation</p>
+      <h1>Quote Page</h1>
+      <blockquote id="quoteBox" class="quote-box">
+        <p id="quoteText" class="quote-text">Click the button to get a quote.</p>
+        <footer id="quoteAuthor" class="quote-author">— Ready when you are</footer>
+      </blockquote>
+      <button id="quoteButton" type="button">New Quote</button>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

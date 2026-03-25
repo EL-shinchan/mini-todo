@@ -1,26 +1,45 @@
-<!DOCTYPE html>                                                                                                                                         
-   <html lang="en">                                                                                                                                        
-   <head>                                                                                                                                                  
-   <meta charset="UTF-8" />                                                                                                                                
-   <meta name="viewport" content="width=device-width, initial-scale=1.0" />                                                                                
-   <title>Eddie | Personal Page</title>                                                                                                                    
-   <link rel="stylesheet" href="style.css" />                                                                                                              
-   </head>                                                                                                                                                 
-   <body>                                                                                                                                                  
-   <div class="page">                                                                                                                                      
-   <div class="card">                                                                                                                                      
-   <p class="tag">Eddie's Personal Page</p>                                                                                                                
-   <h1>Hi, I'm EL AKA Shinnuoke</h1>                                                                                                                                   
-   <p id="mainText" class="main-text">                                                                                                                     
-   I'm 17, learning coding from zero, building projects, and trying to level up in life.                                                                   
-   </p>                                                                                                                                                    
-                                                                                                                                                           
-   <div class="button-row">                                                                                                                                
-   <button onclick="document.getElementById('mainText').textContent = 'I am Eddie, 17 years old, learning from zero, trying to get sharper, stronger, and more disciplined step by step.';">                                                                                                                        
-   About Me                                                                                                                                                
-   </button>                                                                                                                                               
-                                                                                                                                                           
-   <button onclick="document.getElementById('mainText').textContent = 'Right now I am building coding skills, learning AI, and trying to turn small daily progress into something real.';">                                                                                                                         
-   What I am Building                                                                                                                                      
-   </button>                                                                                                                                               
-   </div>    
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eddie | Personal Page</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="page">
+    <section class="hero-card">
+      <div class="hero-top">
+        <p class="tag">Eddie's Personal Page</p>
+        <div class="badge-row">
+          <span>AI learner</span>
+          <span>Beginner coder</span>
+          <span>Leveling up</span>
+        </div>
+      </div>
+
+      <h1>Hi, I'm Eddie.</h1>
+      <p class="intro">
+        I'm 17, learning coding from zero, building real skills step by step, and trying to become sharper,
+        stronger, and more disciplined over time.
+      </p>
+
+      <div class="tab-row">
+        <button class="tab-button active" data-tab="about" type="button">About Me</button>
+        <button class="tab-button" data-tab="building" type="button">What I'm Building</button>
+        <button class="tab-button" data-tab="mindset" type="button">My Mindset</button>
+      </div>
+
+      <section class="content-panel">
+        <h2 id="panelTitle">About Me</h2>
+        <p id="panelText"></p>
+        <ul id="panelList" class="panel-list"></ul>
+      </section>
+
+      <footer class="footer-note">One step at a time. Still counts.</footer>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
