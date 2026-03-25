@@ -28,6 +28,8 @@ window.onload = function () {
    li.appendChild(deleteButton);                                                                       
    taskList.appendChild(li);                                                                           
                                                                                                        
-   taskInput.value = "";                                                                               
+   taskInput.value = "";      
+   #ajksdhaskhdjaskdh
+   
    };                                                                                                  
    };                   
