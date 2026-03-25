@@ -29,7 +29,6 @@ window.onload = function () {
    taskList.appendChild(li);                                                                           
                                                                                                        
    taskInput.value = "";      
-   #ajksdhaskhdjaskdh
    
    };                                                                                                  
    };                   
