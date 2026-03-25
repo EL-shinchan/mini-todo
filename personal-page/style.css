@@ -1,44 +1,98 @@
-  body {                                                                                              
-   margin: 0;                                                                                          
-   font-family: Arial, sans-serif;                                                                     
-   background: linear-gradient(to right, #0f172a, #1e293b);                                            
-   color: white;                                                                                       
-   display: flex;                                                                                      
-   justify-content: center;                                                                            
-   align-items: center;                                                                                
-   height: 100vh;                                                                                      
-   }                                                                                                   
-                                                                                                       
-   .card {                                                                                             
-   background: rgba(255, 255, 255, 0.1);                                                               
-   padding: 30px;                                                                                      
-   border-radius: 20px;                                                                                
-   text-align: center;                                                                                 
-   width: 320px;                                                                                       
-   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);                                                         
-   }                                                                                                   
-                                                                                                       
-   h1 {                                                                                                
-   margin-bottom: 10px;                                                                                
-   }                                                                                                   
-                                                                                                       
-   p {                                                                                                 
-   font-size: 16px;                                                                                    
-   line-height: 1.5;                                                                                   
-   }                                                                                                   
-                                                                                                       
-   button {                                                                                            
-   margin-top: 20px;                                                                                   
-   padding: 12px 20px;                                                                                 
-   border: none;                                                                                       
-   border-radius: 10px;                                                                                
-   background: #38bdf8;                                                                                
-   color: #0f172a;                                                                                     
-   font-weight: bold;                                                                                  
-   cursor: pointer;                                                                                    
-   transition: 0.2s;                                                                                   
-   }                                                                                                   
-                                                                                                       
-   button:hover {                                                                                      
-   background: #7dd3fc;                                                                                
-   }                           
+ body {                                                                                                                                                  
+   margin: 0;                                                                                                                                              
+   font-family: Arial, sans-serif;                                                                                                                         
+   background: radial-gradient(circle at top, #1e293b, #0f172a 60%);                                                                                       
+   color: white;                                                                                                                                           
+   min-height: 100vh;                                                                                                                                      
+   }                                                                                                                                                       
+                                                                                                                                                           
+   .page {                                                                                                                                                 
+   display: flex;                                                                                                                                          
+   justify-content: center;                                                                                                                                
+   align-items: center;                                                                                                                                    
+   min-height: 100vh;                                                                                                                                      
+   padding: 24px;                                                                                                                                          
+   }                                                                                                                                                       
+                                                                                                                                                           
+   .card {                                                                                                                                                 
+   width: 100%;                                                                                                                                            
+   max-width: 520px;                                                                                                                                       
+   background: rgba(15, 23, 42, 0.75);                                                                                                                     
+   border: 1px solid rgba(255, 255, 255, 0.08);                                                                                                            
+   border-radius: 24px;                                                                                                                                    
+   padding: 32px;                                                                                                                                          
+   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);                                                                                                            
+   backdrop-filter: blur(8px);                                                                                                                             
+   }                                                                                                                                                       
+                                                                                                                                                           
+   .tag {                                                                                                                                                  
+   display: inline-block;                                                                                                                                  
+   margin: 0 0 12px 0;                                                                                                                                     
+   padding: 6px 12px;                                                                                                                                      
+   border-radius: 999px;                                                                                                                                   
+   background: rgba(59, 130, 246, 0.18);                                                                                                                   
+   color: #93c5fd;                                                                                                                                         
+   font-size: 14px;                                                                                                                                        
+   font-weight: bold;                                                                                                                                      
+   }                                                                                                                                                       
+                                                                                                                                                           
+   h1 {                                                                                                                                                    
+   margin: 0 0 12px 0;                                                                                                                                     
+   font-size: 40px;                                                                                                                                        
+   }                                                                                                                                                       
+                                                                                                                                                           
+   .main-text {                                                                                                                                            
+   font-size: 18px;                                                                                                                                        
+   line-height: 1.7;                                                                                                                                       
+   color: #dbeafe;                                                                                                                                         
+   margin-bottom: 24px;                                                                                                                                    
+   }                                                                                                                                                       
+                                                                                                                                                           
+   .button-row {                                                                                                                                           
+   display: flex;                                                                                                                                          
+   gap: 12px;                                                                                                                                              
+   flex-wrap: wrap;                                                                                                                                        
+   }                                                                                                                                                       
+                                                                                                                                                           
+   button {                                                                                                                                                
+   border: none;                                                                                                                                           
+   border-radius: 12px;                                                                                                                                    
+   padding: 12px 18px;                                                                                                                                     
+   font-size: 15px;                                                                                                                                        
+   font-weight: bold;                                                                                                                                      
+   cursor: pointer;                                                                                                                                        
+   transition: 0.2s ease;                                                                                                                                  
+   }                                                                                                                                                       
+                                                                                                                                                           
+   #aboutButton {                                                                                                                                          
+   background: #38bdf8;                                                                                                                                    
+   color: #082f49;                                                                                                                                         
+   }                                                                                                                                                       
+                                                                                                                                                           
+   #aboutButton:hover {                                                                                                                                    
+   background: #7dd3fc;                                                                                                                                    
+   }                                                                                                                                                       
+                                                                                                                                                           
+   #buildButton {                                                                                                                                          
+   background: #a78bfa;                                                                                                                                    
+   color: #2e1065;                                                                                                                                         
+   }                                                                                                                                                       
+                                                                                                                                                           
+   #buildButton:hover {                                                                                                                                    
+   background: #c4b5fd;                                                                                                                                    
+   }                                                                                                                                                       
+                                                                                                                                                           
+   .mini-info {                                                                                                                                            
+   display: flex;                                                                                                                                          
+   flex-wrap: wrap;                                                                                                                                        
+   gap: 10px;                                                                                                                                              
+   margin-top: 24px;                                                                                                                                       
+   }                                                                                                                                                       
+                                                                                                                                                           
+   .mini-info span {                                                                                                                                       
+   background: rgba(255, 255, 255, 0.08);                                                                                                                  
+   color: #e2e8f0;                                                                                                                                         
+   padding: 8px 12px;                                                                                                                                      
+   border-radius: 999px;                                                                                                                                   
+   font-size: 14px;                                                                                                                                        
+   }                         
