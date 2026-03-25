@@ -1,26 +1,36 @@
-<!DOCTYPE html>                                                                                                                                         
+   <!DOCTYPE html>                                                                                                                                         
    <html lang="en">                                                                                                                                        
    <head>                                                                                                                                                  
    <meta charset="UTF-8" />                                                                                                                                
    <meta name="viewport" content="width=device-width, initial-scale=1.0" />                                                                                
-   <title>Eddie | Personal Page</title>                                                                                                                    
+   <title>EL aka Shinnuoke | Personal Page</title>                                                                                                         
    <link rel="stylesheet" href="style.css" />                                                                                                              
    </head>                                                                                                                                                 
    <body>                                                                                                                                                  
    <div class="page">                                                                                                                                      
    <div class="card">                                                                                                                                      
-   <p class="tag">Eddie's Personal Page</p>                                                                                                                
-   <h1>Hi, I'm EL AKA Shinnuoke</h1>                                                                                                                                   
+   <p class="tag">Personal Landing Page</p>                                                                                                                
+   <h1>Hi, I'm EL aka Shinnuoke</h1>                                                                                                                       
+   <h2>Learning fast. Building for real. Growing stronger.</h2>                                                                                            
+                                                                                                                                                           
    <p id="mainText" class="main-text">                                                                                                                     
    I'm 17, learning coding from zero, building projects, and trying to level up in life.                                                                   
    </p>                                                                                                                                                    
                                                                                                                                                            
    <div class="button-row">                                                                                                                                
-   <button onclick="document.getElementById('mainText').textContent = 'I am Eddie, 17 years old, learning from zero, trying to get sharper, stronger, and more disciplined step by step.';">                                                                                                                        
-   About Me                                                                                                                                                
-   </button>                                                                                                                                               
+   <button id="aboutButton">About Me</button>                                                                                                              
+   <button id="buildButton">What I'm Building</button>                                                                                                     
+   </div>                                                                                                                                                  
                                                                                                                                                            
-   <button onclick="document.getElementById('mainText').textContent = 'Right now I am building coding skills, learning AI, and trying to turn small daily progress into something real.';">                                                                                                                         
-   What I am Building                                                                                                                                      
-   </button>                                                                                                                                               
-   </div>    
+   <div class="highlight-grid">                                                                                                                            
+   <div class="highlight-box active-box" id="boxAi">AI learner</div>                                                                                       
+   <div class="highlight-box active-box" id="boxBuilder">Project builder</div>                                                                             
+   <div class="highlight-box" id="boxDiscipline">Discipline</div>                                                                                          
+   <div class="highlight-box" id="boxGrowth">Growth mindset</div>                                                                                          
+   </div>                                                                                                                                                  
+   </div>                                                                                                                                                  
+   </div>                                                                                                                                                  
+                                                                                                                                                           
+   <script src="./script.js"></script>                                                                                                                     
+   </body>                                                                                                                                                 
+   </html>                                                                                                                                                                    
