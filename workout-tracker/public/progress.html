@@ -45,8 +45,8 @@
         <p class="stat-label">Tracked sessions</p>
         <p class="stat-value" id="trackedSessions">0</p>
       </article>
-      <article class="stat-card">
-        <p class="stat-label">Best top weight</p>
+      <article class="stat-card pr-best-card">
+        <p class="stat-label">All-time best</p>
         <p class="stat-value" id="bestWeight">0</p>
       </article>
       <article class="stat-card">
@@ -54,9 +54,23 @@
         <p class="stat-value" id="bestVolume">0</p>
       </article>
       <article class="stat-card">
+        <p class="stat-label">PR date</p>
+        <p class="stat-value stat-small" id="bestWeightDate">No data yet</p>
+      </article>
+      <article class="stat-card">
         <p class="stat-label">Latest entry</p>
         <p class="stat-value stat-small" id="latestEntry">No data yet</p>
       </article>
+    </section>
+
+    <section class="panel highlight-panel">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">Current top mark</p>
+          <h2>All-time best highlight</h2>
+        </div>
+      </div>
+      <div id="bestLiftHighlight" class="empty-message">Choose an exercise to load progress.</div>
     </section>
 
     <section class="content-grid two-columns">

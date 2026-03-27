@@ -5,6 +5,7 @@ require("./db/database");
 const exercisesRouter = require("./routes/exercises");
 const workoutsRouter = require("./routes/workouts");
 const progressRouter = require("./routes/progress");
+const prsRouter = require("./routes/prs");
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
@@ -20,6 +21,7 @@ app.get("/api/health", (req, res) => {
 app.use("/api/exercises", exercisesRouter);
 app.use("/api/workouts", workoutsRouter);
 app.use("/api/progress", progressRouter);
+app.use("/api/prs", prsRouter);
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(publicDir, "index.html"));

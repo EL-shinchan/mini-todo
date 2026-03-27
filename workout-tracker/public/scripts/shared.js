@@ -28,13 +28,27 @@
     return Number.isFinite(number) ? number.toLocaleString(undefined, { maximumFractionDigits: 1 }) : "0";
   }
 
-  function setMessage(element, message, type) {
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function setMessage(element, message, type, allowHtml) {
     if (!element) {
       return;
     }
 
-    element.textContent = message;
-    element.classList.remove("success", "error");
+    if (allowHtml) {
+      element.innerHTML = message;
+    } else {
+      element.textContent = message;
+    }
+
+    element.classList.remove("success", "error", "pr-celebration");
 
     if (type) {
       element.classList.add(type);
@@ -69,6 +83,7 @@
     },
     formatDate,
     formatNumber,
+    escapeHtml,
     setMessage
   };
 

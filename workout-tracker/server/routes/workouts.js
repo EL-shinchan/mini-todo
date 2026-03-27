@@ -111,8 +111,14 @@ router.post("/", (req, res) => {
         .run(title, workoutDate, notes);
 
       const workoutId = Number(workoutResult.lastInsertRowid);
-      const findExerciseById = db.prepare(`SELECT id FROM exercises WHERE id = ?`);
-      const findExerciseByName = db.prepare(`SELECT id FROM exercises WHERE name = ? COLLATE NOCASE`);
+      const findExerciseById = db.prepare(`SELECT id, name FROM exercises WHERE id = ?`);
+      const findExerciseByName = db.prepare(`SELECT id, name FROM exercises WHERE name = ? COLLATE NOCASE`);
+      const getPreviousBestWeight = db.prepare(
+        `SELECT COALESCE(MAX(sl.weight), 0) AS topWeight
+         FROM workout_exercises we
+         JOIN set_logs sl ON sl.workout_exercise_id = we.id
+         WHERE we.exercise_id = ?`
+      );
       const insertExercise = db.prepare(
         `INSERT INTO exercises (name, muscle_group, category)
          VALUES (?, ?, ?)`
@@ -126,6 +132,10 @@ router.post("/", (req, res) => {
          VALUES (?, ?, ?, ?, ?)`
       );
 
+      const previousBestByExercise = new Map();
+      const workoutBestByExercise = new Map();
+      const exerciseNamesById = new Map();
+
       exercises.forEach((exercise, exerciseIndex) => {
         const setList = Array.isArray(exercise.sets) ? exercise.sets : [];
 
@@ -134,27 +144,39 @@ router.post("/", (req, res) => {
         }
 
         let exerciseId = exercise.exerciseId ? Number(exercise.exerciseId) : null;
+        let exerciseName = "";
 
         if (exerciseId) {
           const existingExercise = findExerciseById.get(exerciseId);
           if (!existingExercise) {
             throw new Error(`Selected exercise ${exerciseId} was not found.`);
           }
+
+          exerciseName = existingExercise.name;
         } else {
-          const exerciseName = String(exercise.name || "").trim();
+          const requestedExerciseName = String(exercise.name || "").trim();
           const muscleGroup = String(exercise.muscleGroup || "").trim();
           const category = String(exercise.category || "").trim();
 
-          if (!exerciseName) {
+          if (!requestedExerciseName) {
             throw new Error(`Exercise ${exerciseIndex + 1} needs a name.`);
           }
 
-          const existingByName = findExerciseByName.get(exerciseName);
+          const existingByName = findExerciseByName.get(requestedExerciseName);
           if (existingByName) {
             exerciseId = existingByName.id;
+            exerciseName = existingByName.name;
           } else {
-            exerciseId = Number(insertExercise.run(exerciseName, muscleGroup, category).lastInsertRowid);
+            exerciseId = Number(insertExercise.run(requestedExerciseName, muscleGroup, category).lastInsertRowid);
+            exerciseName = requestedExerciseName;
           }
+        }
+
+        exerciseNamesById.set(exerciseId, exerciseName);
+
+        if (!previousBestByExercise.has(exerciseId)) {
+          const previousBestWeight = Number(getPreviousBestWeight.get(exerciseId).topWeight || 0);
+          previousBestByExercise.set(exerciseId, previousBestWeight);
         }
 
         const workoutExerciseId = Number(
@@ -165,6 +187,8 @@ router.post("/", (req, res) => {
             String(exercise.notes || "").trim()
           ).lastInsertRowid
         );
+
+        let currentExerciseTopWeight = workoutBestByExercise.get(exerciseId) || 0;
 
         setList.forEach((set, setIndex) => {
           const weight = sanitizeNumber(set.weight);
@@ -180,22 +204,40 @@ router.post("/", (req, res) => {
           }
 
           insertSet.run(workoutExerciseId, setIndex + 1, weight, Math.round(reps), setNotes);
+          currentExerciseTopWeight = Math.max(currentExerciseTopWeight, weight);
         });
+
+        workoutBestByExercise.set(exerciseId, currentExerciseTopWeight);
       });
 
-      return workoutId;
+      const newPrs = [];
+
+      workoutBestByExercise.forEach((topWeight, exerciseId) => {
+        const previousBestWeight = Number(previousBestByExercise.get(exerciseId) || 0);
+
+        if (topWeight > previousBestWeight) {
+          newPrs.push({
+            exerciseId,
+            exerciseName: exerciseNamesById.get(exerciseId),
+            weight: topWeight,
+            workoutDate
+          });
+        }
+      });
+
+      return { workoutId, newPrs };
     });
 
-    const workoutId = createWorkout();
+    const result = createWorkout();
     const createdWorkout = db
       .prepare(
         `SELECT id, title, workout_date AS workoutDate, notes, created_at AS createdAt
          FROM workout_sessions
          WHERE id = ?`
       )
-      .get(workoutId);
+      .get(result.workoutId);
 
-    res.status(201).json({ workout: createdWorkout });
+    res.status(201).json({ workout: createdWorkout, newPrs: result.newPrs });
   } catch (error) {
     res.status(400).json({ message: error.message || "Could not save workout." });
   }

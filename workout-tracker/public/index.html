@@ -22,10 +22,10 @@
     <section class="hero-panel hero-grid">
       <div>
         <p class="eyebrow">Structured training log</p>
-        <h1>Track the work.<br />See the climb.</h1>
+        <h1>Track the work.<br />Own the PR.</h1>
         <p class="hero-copy">
-          Log full sessions, save sets into a real database, and watch your strength move on the graph instead
-          of guessing from memory.
+          Log full sessions, save sets into a real database, and let the app show you exactly when your strength
+          breaks past the old ceiling.
         </p>
         <div class="hero-actions">
           <a class="button button-primary" href="workout.html">Log today’s workout</a>
@@ -37,9 +37,9 @@
           <p class="mini-label">Current mode</p>
           <p class="mini-value">Lift • Save • Review</p>
         </div>
-        <div class="mini-panel">
-          <p class="mini-label">Version 1 focus</p>
-          <p class="mini-value">Sessions, exercises, graphs, consistency</p>
+        <div class="mini-panel pr-mini-panel">
+          <p class="mini-label">Version 2 focus</p>
+          <p class="mini-value">PR feedback, cleaner wins, better motivation</p>
         </div>
       </div>
     </section>
@@ -56,6 +56,10 @@
       <article class="stat-card">
         <p class="stat-label">Logged sets</p>
         <p class="stat-value" id="totalSets">0</p>
+      </article>
+      <article class="stat-card pr-best-card">
+        <p class="stat-label">Total PRs</p>
+        <p class="stat-value" id="totalPrs">0</p>
       </article>
       <article class="stat-card">
         <p class="stat-label">Last workout</p>
@@ -75,14 +79,25 @@
         <div id="recentWorkouts" class="stack-list empty-message">No workouts yet. Start with your first session.</div>
       </article>
 
-      <article class="panel">
+      <article class="panel pr-panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Recent PRs</p>
+            <h2>Latest breakthroughs</h2>
+          </div>
+          <a class="text-link" href="progress.html">Open progress</a>
+        </div>
+        <div id="recentPrs" class="stack-list empty-message">No PRs yet. Keep logging.</div>
+      </article>
+
+      <article class="panel full-span">
         <div class="panel-header">
           <div>
             <p class="eyebrow">Quick launch</p>
             <h2>What you can do next</h2>
           </div>
         </div>
-        <div class="quick-actions">
+        <div class="quick-actions three-up">
           <a class="quick-card" href="workout.html">
             <span class="quick-number">01</span>
             <div>

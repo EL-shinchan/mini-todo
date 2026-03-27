@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     selectElement.innerHTML = [
       '<option value="">Choose an exercise</option>',
       ...exercises.map(function (exercise) {
-        return `<option value="${exercise.id}">${exercise.name}</option>`;
+        return `<option value="${exercise.id}">${window.appUtils.escapeHtml(exercise.name)}</option>`;
       }),
       '<option value="custom">+ Create new exercise</option>'
     ].join("");
@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       title.textContent = "Custom exercise";
     } else {
       customGrid.classList.add("hidden");
-      title.textContent = selectedOption && selectedOption.text ? selectedOption.text : "New exercise";
+      title.textContent = selectedOption && selectedOption.text ? selectedOption.text : "Choose an exercise";
     }
   }
 
@@ -162,6 +162,21 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
   }
 
+  function buildPrMessage(newPrs) {
+    const items = newPrs.map(function (pr) {
+      return `<li><strong>${window.appUtils.escapeHtml(pr.exerciseName)}</strong> — ${window.appUtils.formatNumber(pr.weight)} kg</li>`;
+    }).join("");
+
+    return `
+      <div class="status-title-row">
+        <span class="pr-badge">New PR${newPrs.length > 1 ? "s" : ""}</span>
+        <strong>Workout saved.</strong>
+      </div>
+      <p class="status-copy">You beat your old best on ${newPrs.length} exercise${newPrs.length > 1 ? "s" : ""}.</p>
+      <ul class="status-list">${items}</ul>
+    `;
+  }
+
   addExerciseButton.addEventListener("click", function () {
     addExerciseCard();
   });
@@ -186,8 +201,15 @@ document.addEventListener("DOMContentLoaded", async function () {
       }
 
       window.appUtils.setMessage(formStatus, "Saving workout...", null);
-      await window.appUtils.postJSON("/api/workouts", payload);
-      window.appUtils.setMessage(formStatus, "Workout saved. Nice. Keep stacking those sessions.", "success");
+      const response = await window.appUtils.postJSON("/api/workouts", payload);
+      const newPrs = Array.isArray(response.newPrs) ? response.newPrs : [];
+
+      if (newPrs.length > 0) {
+        window.appUtils.setMessage(formStatus, buildPrMessage(newPrs), "pr-celebration", true);
+      } else {
+        window.appUtils.setMessage(formStatus, "Workout saved. Nice. Keep stacking those sessions.", "success");
+      }
+
       workoutForm.reset();
       workoutDate.value = new Date().toISOString().slice(0, 10);
       exerciseList.innerHTML = "";

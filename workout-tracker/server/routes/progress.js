@@ -18,7 +18,7 @@ router.get("/exercise/:exerciseId", (req, res) => {
     return res.status(404).json({ message: "Exercise not found." });
   }
 
-  const summary = db
+  const rawSummary = db
     .prepare(
       `SELECT
          ws.id AS workoutId,
@@ -36,6 +36,32 @@ router.get("/exercise/:exerciseId", (req, res) => {
        ORDER BY ws.workout_date ASC, ws.id ASC`
     )
     .all(exerciseId);
+
+  let runningBestWeight = 0;
+  let allTimeBest = null;
+
+  const summary = rawSummary.map((entry, index) => {
+    const topWeight = Number(entry.topWeight || 0);
+    const isPr = topWeight > runningBestWeight;
+
+    if (isPr) {
+      runningBestWeight = topWeight;
+      allTimeBest = {
+        weight: topWeight,
+        workoutDate: entry.workoutDate,
+        title: entry.title,
+        workoutId: entry.workoutId,
+        chartIndex: index
+      };
+    }
+
+    return {
+      ...entry,
+      topWeight,
+      totalVolume: Number(entry.totalVolume || 0),
+      isPr
+    };
+  });
 
   const rawHistory = db
     .prepare(
@@ -59,6 +85,10 @@ router.get("/exercise/:exerciseId", (req, res) => {
     )
     .all(exerciseId);
 
+  const prWorkoutIds = new Set(
+    summary.filter((entry) => entry.isPr).map((entry) => Number(entry.workoutId))
+  );
+
   const groupedHistory = [];
   const historyMap = new Map();
 
@@ -69,6 +99,8 @@ router.get("/exercise/:exerciseId", (req, res) => {
         title: row.title,
         workoutDate: row.workoutDate,
         exerciseNotes: row.exerciseNotes,
+        isPr: prWorkoutIds.has(Number(row.workoutId)),
+        isCurrentAllTimeBest: allTimeBest ? Number(allTimeBest.workoutId) === Number(row.workoutId) : false,
         sets: []
       };
       historyMap.set(row.workoutId, entry);
@@ -86,10 +118,12 @@ router.get("/exercise/:exerciseId", (req, res) => {
   res.json({
     exercise,
     summary,
+    allTimeBest,
     chartData: {
       labels: summary.map((entry) => entry.workoutDate),
       topWeight: summary.map((entry) => entry.topWeight),
-      totalVolume: summary.map((entry) => entry.totalVolume)
+      totalVolume: summary.map((entry) => entry.totalVolume),
+      prPointIndex: allTimeBest ? allTimeBest.chartIndex : null
     },
     history: groupedHistory
   });
