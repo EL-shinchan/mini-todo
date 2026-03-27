@@ -36,6 +36,6 @@ app.use((error, req, res, next) => {
   res.status(500).json({ message: "Server error." });
 });
 
-app.listen(PORT, () => {
-  console.log(`Workout Tracker running at http://127.0.0.1:${PORT}`);
-});
+app.listen(PORT, "0.0.0.0", () => {                                                                
+   console.log(`Workout Tracker running at http://0.0.0.0:${PORT}`);                                  
+   });
