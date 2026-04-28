@@ -54,6 +54,37 @@
         <div class="form-status" id="formStatus">Ready when you are.</div>
       </section>
 
+      <section class="panel photo-upload-panel full-span">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Fast capture</p>
+            <h2>Upload workout photo</h2>
+          </div>
+          <span class="info-pill">Mock AI V1</span>
+        </div>
+
+        <div class="photo-upload-grid">
+          <label class="photo-drop-zone" for="workoutPhotoInput">
+            <span class="photo-drop-icon">📷</span>
+            <strong>Take or upload a workout photo</strong>
+            <span>Use a note, gym screen, scale photo, or messy training scribble. You will review it before saving.</span>
+            <input type="file" id="workoutPhotoInput" accept="image/*" capture="environment" />
+          </label>
+
+          <div class="photo-preview-card hidden" id="photoPreviewCard">
+            <img id="photoPreview" alt="Selected workout upload preview" />
+          </div>
+        </div>
+
+        <div class="form-actions photo-actions">
+          <button type="button" class="button button-secondary" id="extractPhotoButton">Extract workout draft</button>
+          <button type="button" class="button button-ghost hidden" id="discardPhotoDraftButton">Discard draft</button>
+        </div>
+
+        <div class="form-status" id="photoStatus">No photo selected yet.</div>
+        <div class="photo-draft-review hidden" id="photoDraftReview"></div>
+      </section>
+
       <section class="panel">
         <div class="panel-header">
           <div>

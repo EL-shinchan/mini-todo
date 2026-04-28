@@ -6,10 +6,18 @@ document.addEventListener("DOMContentLoaded", async function () {
   const exerciseList = document.getElementById("exerciseList");
   const addExerciseButton = document.getElementById("addExerciseButton");
   const formStatus = document.getElementById("formStatus");
+  const workoutPhotoInput = document.getElementById("workoutPhotoInput");
+  const photoPreviewCard = document.getElementById("photoPreviewCard");
+  const photoPreview = document.getElementById("photoPreview");
+  const extractPhotoButton = document.getElementById("extractPhotoButton");
+  const discardPhotoDraftButton = document.getElementById("discardPhotoDraftButton");
+  const photoStatus = document.getElementById("photoStatus");
+  const photoDraftReview = document.getElementById("photoDraftReview");
   const exerciseTemplate = document.getElementById("exerciseTemplate");
   const setTemplate = document.getElementById("setTemplate");
 
   let exercises = [];
+  let activePhotoDraft = null;
 
   workoutDate.value = new Date().toISOString().slice(0, 10);
 
@@ -68,7 +76,24 @@ document.addEventListener("DOMContentLoaded", async function () {
     renumberSets(setList);
   }
 
-  function addExerciseCard() {
+  function selectExerciseByName(card, exerciseName) {
+    const select = card.querySelector(".exercise-select");
+    const customName = card.querySelector(".custom-name");
+    const match = exercises.find(function (exercise) {
+      return exercise.name.toLowerCase() === String(exerciseName || "").trim().toLowerCase();
+    });
+
+    if (match) {
+      select.value = String(match.id);
+    } else {
+      select.value = "custom";
+      customName.value = exerciseName || "";
+    }
+
+    toggleCustomFields(card);
+  }
+
+  function addExerciseCard(values) {
     const card = exerciseTemplate.content.firstElementChild.cloneNode(true);
     const select = card.querySelector(".exercise-select");
     const addSetButton = card.querySelector(".add-set-button");
@@ -91,6 +116,170 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
 
     exerciseList.appendChild(card);
+
+    if (values) {
+      selectExerciseByName(card, values.name);
+      card.querySelector(".exercise-notes").value = values.notes || "";
+      card.querySelector(".set-list").innerHTML = "";
+      (values.sets || []).forEach(function (set) {
+        addSet(card, set);
+      });
+
+      if (!values.sets || values.sets.length === 0) {
+        addSet(card);
+      }
+    }
+  }
+
+  function buildDraftSetRow(set, exerciseIndex, setIndex) {
+    return `
+      <div class="photo-draft-set" data-exercise-index="${exerciseIndex}" data-set-index="${setIndex}">
+        <div class="set-badge">Set <span>${setIndex + 1}</span></div>
+        <label class="field compact-field">
+          <span>Weight</span>
+          <input type="number" class="draft-set-weight" min="0" step="0.5" value="${window.appUtils.escapeHtml(String(set.weight || ""))}" />
+        </label>
+        <label class="field compact-field">
+          <span>Reps</span>
+          <input type="number" class="draft-set-reps" min="1" step="1" value="${window.appUtils.escapeHtml(String(set.reps || ""))}" />
+        </label>
+        <label class="field compact-field stretch-field">
+          <span>Notes</span>
+          <input type="text" class="draft-set-notes" value="${window.appUtils.escapeHtml(set.notes || "")}" />
+        </label>
+      </div>
+    `;
+  }
+
+  function renderPhotoDraft(draft) {
+    const exercisesHtml = (draft.exercises || []).map(function (exercise, exerciseIndex) {
+      const setsHtml = (exercise.sets || []).map(function (set, setIndex) {
+        return buildDraftSetRow(set, exerciseIndex, setIndex);
+      }).join("");
+
+      return `
+        <article class="photo-draft-exercise" data-exercise-index="${exerciseIndex}">
+          <div class="exercise-card-header">
+            <div>
+              <p class="mini-label">Draft exercise ${exerciseIndex + 1}</p>
+              <h3>${window.appUtils.escapeHtml(exercise.name || "Unnamed exercise")}</h3>
+            </div>
+          </div>
+          <div class="form-grid">
+            <label class="field">
+              <span>Exercise name</span>
+              <input type="text" class="draft-exercise-name" value="${window.appUtils.escapeHtml(exercise.name || "")}" />
+            </label>
+            <label class="field">
+              <span>Exercise notes</span>
+              <input type="text" class="draft-exercise-notes" value="${window.appUtils.escapeHtml(exercise.notes || "")}" />
+            </label>
+          </div>
+          <div class="photo-draft-sets">${setsHtml}</div>
+        </article>
+      `;
+    }).join("");
+
+    photoDraftReview.innerHTML = `
+      <div class="photo-draft-header">
+        <div>
+          <p class="eyebrow">Review before saving</p>
+          <h3>Editable workout draft</h3>
+        </div>
+        <button type="button" class="button button-primary" id="addDraftToWorkoutButton">Add to workout</button>
+      </div>
+      <div class="form-grid">
+        <label class="field">
+          <span>Body weight</span>
+          <input type="number" id="draftBodyWeight" min="0" step="0.1" value="${window.appUtils.escapeHtml(String(draft.bodyWeight || ""))}" />
+        </label>
+        <label class="field">
+          <span>Unit</span>
+          <input type="text" id="draftBodyWeightUnit" value="${window.appUtils.escapeHtml(draft.bodyWeightUnit || "kg")}" />
+        </label>
+      </div>
+      <label class="field">
+        <span>Draft notes</span>
+        <textarea id="draftWorkoutNotes" rows="3">${window.appUtils.escapeHtml(draft.notes || "")}</textarea>
+      </label>
+      <div class="photo-draft-exercises">${exercisesHtml}</div>
+    `;
+
+    photoDraftReview.classList.remove("hidden");
+    discardPhotoDraftButton.classList.remove("hidden");
+    document.getElementById("addDraftToWorkoutButton").addEventListener("click", addDraftToWorkout);
+  }
+
+  function collectPhotoDraftEdits() {
+    const draftExercises = Array.from(photoDraftReview.querySelectorAll(".photo-draft-exercise")).map(function (exerciseNode) {
+      return {
+        name: exerciseNode.querySelector(".draft-exercise-name").value.trim(),
+        notes: exerciseNode.querySelector(".draft-exercise-notes").value.trim(),
+        sets: Array.from(exerciseNode.querySelectorAll(".photo-draft-set")).map(function (setNode) {
+          return {
+            weight: Number(setNode.querySelector(".draft-set-weight").value),
+            reps: Number(setNode.querySelector(".draft-set-reps").value),
+            notes: setNode.querySelector(".draft-set-notes").value.trim()
+          };
+        })
+      };
+    });
+
+    return {
+      bodyWeight: document.getElementById("draftBodyWeight").value,
+      bodyWeightUnit: document.getElementById("draftBodyWeightUnit").value.trim() || "kg",
+      notes: document.getElementById("draftWorkoutNotes").value.trim(),
+      exercises: draftExercises
+    };
+  }
+
+  function addDraftToWorkout() {
+    const draft = collectPhotoDraftEdits();
+    const validExercises = draft.exercises.filter(function (exercise) {
+      return exercise.name && exercise.sets.some(function (set) {
+        return Number(set.weight) > 0 && Number(set.reps) > 0;
+      });
+    });
+
+    if (validExercises.length === 0) {
+      window.appUtils.setMessage(photoStatus, "Draft needs at least one exercise with valid weight and reps.", "error");
+      return;
+    }
+
+    if (exerciseList.children.length === 1) {
+      const firstCard = exerciseList.querySelector(".exercise-card");
+      const hasEmptyFirstCard = firstCard
+        && !firstCard.querySelector(".exercise-select").value
+        && Array.from(firstCard.querySelectorAll(".set-weight, .set-reps")).every(function (input) { return !input.value; });
+
+      if (hasEmptyFirstCard) {
+        exerciseList.innerHTML = "";
+      }
+    }
+
+    validExercises.forEach(function (exercise) {
+      addExerciseCard(exercise);
+    });
+
+    const noteLines = [];
+    if (draft.bodyWeight) {
+      noteLines.push(`Body weight: ${draft.bodyWeight}${draft.bodyWeightUnit ? " " + draft.bodyWeightUnit : ""}`);
+    }
+    if (draft.notes) {
+      noteLines.push(draft.notes);
+    }
+    if (noteLines.length > 0) {
+      workoutNotes.value = [workoutNotes.value.trim(), noteLines.join("\n")].filter(Boolean).join("\n\n");
+    }
+
+    window.appUtils.setMessage(photoStatus, "Draft added to the workout form. Review once more, then save normally.", "success");
+  }
+
+  function clearPhotoDraft() {
+    activePhotoDraft = null;
+    photoDraftReview.innerHTML = "";
+    photoDraftReview.classList.add("hidden");
+    discardPhotoDraftButton.classList.add("hidden");
   }
 
   function collectSets(card, exerciseIndex) {
@@ -179,6 +368,69 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   addExerciseButton.addEventListener("click", function () {
     addExerciseCard();
+  });
+
+  workoutPhotoInput.addEventListener("change", function () {
+    const file = workoutPhotoInput.files && workoutPhotoInput.files[0];
+    clearPhotoDraft();
+
+    if (!file) {
+      photoPreviewCard.classList.add("hidden");
+      photoPreview.removeAttribute("src");
+      window.appUtils.setMessage(photoStatus, "No photo selected yet.", null);
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      photoPreviewCard.classList.add("hidden");
+      window.appUtils.setMessage(photoStatus, "Choose an image file, not a document or video.", "error");
+      return;
+    }
+
+    photoPreview.src = URL.createObjectURL(file);
+    photoPreviewCard.classList.remove("hidden");
+    window.appUtils.setMessage(photoStatus, `Selected ${file.name}. Extract when ready.`, "success");
+  });
+
+  extractPhotoButton.addEventListener("click", async function () {
+    const file = workoutPhotoInput.files && workoutPhotoInput.files[0];
+
+    if (!file) {
+      window.appUtils.setMessage(photoStatus, "Choose a workout photo first.", "error");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("photo", file);
+
+    try {
+      extractPhotoButton.disabled = true;
+      window.appUtils.setMessage(photoStatus, "Extracting workout draft...", null);
+
+      const response = await fetch("/api/photo-drafts/workout", {
+        method: "POST",
+        body: formData
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.message || "Could not extract workout draft.");
+      }
+
+      activePhotoDraft = payload.draft;
+      renderPhotoDraft(activePhotoDraft);
+      window.appUtils.setMessage(photoStatus, "Mock draft extracted. Check every number before adding it.", "success");
+    } catch (error) {
+      clearPhotoDraft();
+      window.appUtils.setMessage(photoStatus, error.message, "error");
+    } finally {
+      extractPhotoButton.disabled = false;
+    }
+  });
+
+  discardPhotoDraftButton.addEventListener("click", function () {
+    clearPhotoDraft();
+    window.appUtils.setMessage(photoStatus, "Draft discarded. You can extract again or choose another photo.", null);
   });
 
   workoutForm.addEventListener("submit", async function (event) {
