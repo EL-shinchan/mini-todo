@@ -4,3 +4,4 @@ workout-tracker/public/.DS_Store
 workout-tracker/server/.DS_Store
 workout-tracker/.env
 workout-tracker/.env.local
+workout-tracker/data/photo-drafts/

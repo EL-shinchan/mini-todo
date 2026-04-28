@@ -1,11 +1,19 @@
 const express = require("express");
 const multer = require("multer");
-const { parseWorkoutPhoto } = require("../services/photoDraftParser");
+const {
+  createQueuedDraftJob,
+  ensureQueueDirs,
+  listDraftJobs,
+  publicJob,
+  uploadDir
+} = require("../services/photoDraftQueue");
 
 const router = express.Router();
 
+ensureQueueDirs();
+
 const upload = multer({
-  storage: multer.memoryStorage(),
+  dest: uploadDir,
   limits: {
     fileSize: 5 * 1024 * 1024
   },
@@ -18,8 +26,17 @@ const upload = multer({
   }
 });
 
+router.get("/", (req, res) => {
+  const status = String(req.query.status || "").trim();
+  const jobs = listDraftJobs()
+    .filter((job) => !status || job.status === status)
+    .map(publicJob);
+
+  res.json({ jobs });
+});
+
 router.post("/workout", (req, res) => {
-  upload.single("photo")(req, res, async (error) => {
+  upload.single("photo")(req, res, (error) => {
     if (error) {
       const message = error.code === "LIMIT_FILE_SIZE"
         ? "Image is too large. Keep it under 5MB."
@@ -32,11 +49,13 @@ router.post("/workout", (req, res) => {
     }
 
     try {
-      const result = await parseWorkoutPhoto(req.file);
-      return res.json(result);
-    } catch (parseError) {
-      const statusCode = Number(parseError.statusCode || 500);
-      return res.status(statusCode).json({ message: parseError.message || "Could not extract a workout draft." });
+      const job = createQueuedDraftJob(req.file);
+      return res.status(202).json({
+        job: publicJob(job),
+        message: "Photo queued. Shinoske will process it at 22:00."
+      });
+    } catch (queueError) {
+      return res.status(500).json({ message: queueError.message || "Could not queue workout photo." });
     }
   });
 });

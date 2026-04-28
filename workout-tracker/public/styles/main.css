@@ -883,3 +883,30 @@ textarea {
     display: grid;
   }
 }
+
+.processed-drafts-panel {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.processed-draft-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(23, 28, 36, 0.72), rgba(14, 18, 24, 0.72));
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.processed-draft-card h3 {
+  margin-top: 4px;
+}
+
+@media (max-width: 720px) {
+  .processed-draft-card {
+    display: grid;
+  }
+}

@@ -10,8 +10,10 @@ document.addEventListener("DOMContentLoaded", async function () {
   const photoPreviewCard = document.getElementById("photoPreviewCard");
   const photoPreview = document.getElementById("photoPreview");
   const extractPhotoButton = document.getElementById("extractPhotoButton");
+  const refreshDraftsButton = document.getElementById("refreshDraftsButton");
   const discardPhotoDraftButton = document.getElementById("discardPhotoDraftButton");
   const photoStatus = document.getElementById("photoStatus");
+  const processedDraftsList = document.getElementById("processedDraftsList");
   const photoDraftReview = document.getElementById("photoDraftReview");
   const exerciseTemplate = document.getElementById("exerciseTemplate");
   const setTemplate = document.getElementById("setTemplate");
@@ -282,6 +284,56 @@ document.addEventListener("DOMContentLoaded", async function () {
     discardPhotoDraftButton.classList.add("hidden");
   }
 
+  function renderProcessedDrafts(jobs) {
+    const processedJobs = (jobs || []).filter(function (job) {
+      return job.status === "processed" && job.draft;
+    });
+
+    if (processedJobs.length === 0) {
+      processedDraftsList.classList.add("empty-message");
+      processedDraftsList.innerHTML = "No processed photo drafts yet.";
+      return;
+    }
+
+    processedDraftsList.classList.remove("empty-message");
+    processedDraftsList.innerHTML = processedJobs.map(function (job) {
+      const exerciseCount = Array.isArray(job.draft.exercises) ? job.draft.exercises.length : 0;
+      return `
+        <article class="processed-draft-card">
+          <div>
+            <p class="mini-label">${window.appUtils.escapeHtml(window.appUtils.formatDate(job.processedAt || job.uploadedAt))}</p>
+            <h3>${window.appUtils.escapeHtml(job.originalName || "Workout photo")}</h3>
+            <p class="highlight-copy">${exerciseCount} exercise${exerciseCount === 1 ? "" : "s"} detected${job.draft.bodyWeight ? ` • body weight ${window.appUtils.escapeHtml(String(job.draft.bodyWeight))}${window.appUtils.escapeHtml(job.draft.bodyWeightUnit || "kg")}` : ""}</p>
+          </div>
+          <button type="button" class="button button-ghost load-processed-draft-button" data-job-id="${window.appUtils.escapeHtml(job.id)}">Review draft</button>
+        </article>
+      `;
+    }).join("");
+
+    processedDraftsList.querySelectorAll(".load-processed-draft-button").forEach(function (button) {
+      button.addEventListener("click", function () {
+        const job = processedJobs.find(function (candidate) {
+          return candidate.id === button.dataset.jobId;
+        });
+        if (job && job.draft) {
+          activePhotoDraft = job.draft;
+          renderPhotoDraft(activePhotoDraft);
+          window.appUtils.setMessage(photoStatus, "Processed draft loaded. Review it before adding to workout.", "success");
+        }
+      });
+    });
+  }
+
+  async function loadProcessedDrafts() {
+    try {
+      const data = await window.appUtils.getJSON("/api/photo-drafts?status=processed");
+      renderProcessedDrafts(data.jobs || []);
+    } catch (error) {
+      processedDraftsList.classList.add("empty-message");
+      processedDraftsList.textContent = error.message;
+    }
+  }
+
   function collectSets(card, exerciseIndex) {
     const rows = Array.from(card.querySelectorAll(".set-row"));
 
@@ -389,7 +441,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     photoPreview.src = URL.createObjectURL(file);
     photoPreviewCard.classList.remove("hidden");
-    window.appUtils.setMessage(photoStatus, `Selected ${file.name}. Extract when ready.`, "success");
+    window.appUtils.setMessage(photoStatus, `Selected ${file.name}. Queue it when ready.`, "success");
   });
 
   extractPhotoButton.addEventListener("click", async function () {
@@ -405,7 +457,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     try {
       extractPhotoButton.disabled = true;
-      window.appUtils.setMessage(photoStatus, "Extracting workout draft...", null);
+      window.appUtils.setMessage(photoStatus, "Queueing photo for 22:00 processing...", null);
 
       const response = await fetch("/api/photo-drafts/workout", {
         method: "POST",
@@ -414,12 +466,12 @@ document.addEventListener("DOMContentLoaded", async function () {
       const payload = await response.json();
 
       if (!response.ok) {
-        throw new Error(payload.message || "Could not extract workout draft.");
+        throw new Error(payload.message || "Could not queue workout photo.");
       }
 
-      activePhotoDraft = payload.draft;
-      renderPhotoDraft(activePhotoDraft);
-      window.appUtils.setMessage(photoStatus, "Mock draft extracted. Check every number before adding it.", "success");
+      clearPhotoDraft();
+      window.appUtils.setMessage(photoStatus, payload.message || "Photo queued. Shinoske will process it at 22:00.", "success");
+      await loadProcessedDrafts();
     } catch (error) {
       clearPhotoDraft();
       window.appUtils.setMessage(photoStatus, error.message, "error");
@@ -430,7 +482,12 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   discardPhotoDraftButton.addEventListener("click", function () {
     clearPhotoDraft();
-    window.appUtils.setMessage(photoStatus, "Draft discarded. You can extract again or choose another photo.", null);
+    window.appUtils.setMessage(photoStatus, "Draft discarded. You can load another processed draft or queue a new photo.", null);
+  });
+
+  refreshDraftsButton.addEventListener("click", async function () {
+    await loadProcessedDrafts();
+    window.appUtils.setMessage(photoStatus, "Processed drafts refreshed.", "success");
   });
 
   workoutForm.addEventListener("submit", async function (event) {
@@ -472,4 +529,5 @@ document.addEventListener("DOMContentLoaded", async function () {
   });
 
   addExerciseCard();
+  await loadProcessedDrafts();
 });

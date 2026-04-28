@@ -60,7 +60,7 @@
             <p class="eyebrow">Fast capture</p>
             <h2>Upload workout photo</h2>
           </div>
-          <span class="info-pill">Mock AI V1</span>
+          <span class="info-pill">Async 22:00</span>
         </div>
 
         <div class="photo-upload-grid">
@@ -77,11 +77,16 @@
         </div>
 
         <div class="form-actions photo-actions">
-          <button type="button" class="button button-secondary" id="extractPhotoButton">Extract workout draft</button>
+          <button type="button" class="button button-secondary" id="extractPhotoButton">Queue photo for 22:00</button>
+          <button type="button" class="button button-ghost" id="refreshDraftsButton">Refresh processed drafts</button>
           <button type="button" class="button button-ghost hidden" id="discardPhotoDraftButton">Discard draft</button>
         </div>
 
         <div class="form-status" id="photoStatus">No photo selected yet.</div>
+        <div class="processed-drafts-panel" id="processedDraftsPanel">
+          <p class="mini-label">Processed drafts</p>
+          <div id="processedDraftsList" class="stack-list empty-message">No processed photo drafts yet.</div>
+        </div>
         <div class="photo-draft-review hidden" id="photoDraftReview"></div>
       </section>
 
