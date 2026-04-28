@@ -29,7 +29,11 @@ function writeJob(job) {
   return job;
 }
 
-function createQueuedDraftJob(file) {
+function cleanText(value) {
+  return String(value || "").trim();
+}
+
+function createQueuedDraftJob(file, clarification = {}) {
   ensureQueueDirs();
   const id = createJobId();
   const extension = path.extname(file.originalname || "").toLowerCase() || ".jpg";
@@ -44,6 +48,13 @@ function createQueuedDraftJob(file) {
     originalName: file.originalname || "workout-photo",
     mimeType: file.mimetype,
     imagePath,
+    clarification: {
+      quickNote: cleanText(clarification.quickNote),
+      exercise: cleanText(clarification.exercise),
+      weight: cleanText(clarification.weight),
+      reps: cleanText(clarification.reps),
+      bodyWeight: cleanText(clarification.bodyWeight)
+    },
     draft: null,
     error: null,
     processedAt: null
@@ -67,6 +78,7 @@ function publicJob(job) {
     status: job.status,
     uploadedAt: job.uploadedAt,
     originalName: job.originalName,
+    clarification: job.clarification || null,
     draft: job.draft,
     error: job.error,
     processedAt: job.processedAt

@@ -49,7 +49,13 @@ router.post("/workout", (req, res) => {
     }
 
     try {
-      const job = createQueuedDraftJob(req.file);
+      const job = createQueuedDraftJob(req.file, {
+        quickNote: req.body.quickNote,
+        exercise: req.body.exercise,
+        weight: req.body.weight,
+        reps: req.body.reps,
+        bodyWeight: req.body.bodyWeight
+      });
       return res.status(202).json({
         job: publicJob(job),
         message: "Photo queued. Shinoske will process it at 22:00."

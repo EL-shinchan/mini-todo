@@ -7,6 +7,11 @@ document.addEventListener("DOMContentLoaded", async function () {
   const addExerciseButton = document.getElementById("addExerciseButton");
   const formStatus = document.getElementById("formStatus");
   const workoutPhotoInput = document.getElementById("workoutPhotoInput");
+  const photoQuickNote = document.getElementById("photoQuickNote");
+  const photoClarifyExercise = document.getElementById("photoClarifyExercise");
+  const photoClarifyWeight = document.getElementById("photoClarifyWeight");
+  const photoClarifyReps = document.getElementById("photoClarifyReps");
+  const photoClarifyBodyWeight = document.getElementById("photoClarifyBodyWeight");
   const photoPreviewCard = document.getElementById("photoPreviewCard");
   const photoPreview = document.getElementById("photoPreview");
   const extractPhotoButton = document.getElementById("extractPhotoButton");
@@ -334,6 +339,14 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   }
 
+  function appendClarification(formData) {
+    formData.append("quickNote", photoQuickNote.value.trim());
+    formData.append("exercise", photoClarifyExercise.value.trim());
+    formData.append("weight", photoClarifyWeight.value.trim());
+    formData.append("reps", photoClarifyReps.value.trim());
+    formData.append("bodyWeight", photoClarifyBodyWeight.value.trim());
+  }
+
   function collectSets(card, exerciseIndex) {
     const rows = Array.from(card.querySelectorAll(".set-row"));
 
@@ -454,6 +467,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     const formData = new FormData();
     formData.append("photo", file);
+    appendClarification(formData);
 
     try {
       extractPhotoButton.disabled = true;
