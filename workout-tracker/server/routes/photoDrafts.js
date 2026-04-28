@@ -35,7 +35,8 @@ router.post("/workout", (req, res) => {
       const result = await parseWorkoutPhoto(req.file);
       return res.json(result);
     } catch (parseError) {
-      return res.status(500).json({ message: parseError.message || "Could not extract a workout draft." });
+      const statusCode = Number(parseError.statusCode || 500);
+      return res.status(statusCode).json({ message: parseError.message || "Could not extract a workout draft." });
     }
   });
 });

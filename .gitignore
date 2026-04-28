@@ -2,3 +2,5 @@
 workout-tracker/.DS_Store
 workout-tracker/public/.DS_Store
 workout-tracker/server/.DS_Store
+workout-tracker/.env
+workout-tracker/.env.local
