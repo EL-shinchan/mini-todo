@@ -66,6 +66,49 @@ function createQueuedDraftJob(file, clarification = {}, mediaType = "image") {
   return writeJob(job);
 }
 
+function safeDeleteMedia(mediaPath) {
+  if (!mediaPath) {
+    return;
+  }
+
+  const resolvedMediaPath = path.resolve(mediaPath);
+  const resolvedUploadDir = path.resolve(uploadDir);
+
+  if (!resolvedMediaPath.startsWith(`${resolvedUploadDir}${path.sep}`)) {
+    throw new Error("Refusing to delete media outside the upload queue.");
+  }
+
+  if (fs.existsSync(resolvedMediaPath)) {
+    fs.unlinkSync(resolvedMediaPath);
+  }
+}
+
+function deleteDraftJob(id) {
+  ensureQueueDirs();
+
+  if (!/^[\w:-]+$/.test(String(id || ""))) {
+    throw new Error("Invalid draft id.");
+  }
+
+  const filePath = jobPathForId(id);
+  const resolvedJobPath = path.resolve(filePath);
+  const resolvedJobDir = path.resolve(jobDir);
+
+  if (!resolvedJobPath.startsWith(`${resolvedJobDir}${path.sep}`)) {
+    throw new Error("Refusing to delete job outside the queue.");
+  }
+
+  if (!fs.existsSync(resolvedJobPath)) {
+    return false;
+  }
+
+  const job = readJob(resolvedJobPath);
+  safeDeleteMedia(job.imagePath);
+  safeDeleteMedia(job.videoPath);
+  fs.unlinkSync(resolvedJobPath);
+  return true;
+}
+
 function listDraftJobs() {
   ensureQueueDirs();
   return fs
@@ -94,6 +137,7 @@ module.exports = {
   createQueuedDraftJob,
   listDraftJobs,
   publicJob,
+  deleteDraftJob,
   queueRoot,
   uploadDir,
   jobDir

@@ -5,6 +5,7 @@ const {
   ensureQueueDirs,
   listDraftJobs,
   publicJob,
+  deleteDraftJob,
   uploadDir
 } = require("../services/photoDraftQueue");
 
@@ -60,6 +61,20 @@ router.get("/", (req, res) => {
     .map(publicJob);
 
   res.json({ jobs });
+});
+
+router.delete("/:id", (req, res) => {
+  try {
+    const deleted = deleteDraftJob(req.params.id);
+
+    if (!deleted) {
+      return res.status(404).json({ message: "Draft not found." });
+    }
+
+    return res.json({ message: "Draft deleted." });
+  } catch (error) {
+    return res.status(400).json({ message: error.message || "Could not delete draft." });
+  }
 });
 
 router.post("/workout", (req, res) => {

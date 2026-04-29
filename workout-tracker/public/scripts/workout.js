@@ -341,7 +341,10 @@ document.addEventListener("DOMContentLoaded", async function () {
             <h3>${window.appUtils.escapeHtml(job.originalName || "Workout media")}</h3>
             <p class="highlight-copy">${exerciseCount} exercise${exerciseCount === 1 ? "" : "s"} detected${job.draft.bodyWeight ? ` • body weight ${window.appUtils.escapeHtml(String(job.draft.bodyWeight))}${window.appUtils.escapeHtml(job.draft.bodyWeightUnit || "kg")}` : ""}</p>
           </div>
-          <button type="button" class="button button-ghost load-processed-draft-button" data-job-id="${window.appUtils.escapeHtml(job.id)}">Review draft</button>
+          <div class="draft-card-actions">
+            <button type="button" class="button button-ghost load-processed-draft-button" data-job-id="${window.appUtils.escapeHtml(job.id)}">Review draft</button>
+            <button type="button" class="button button-danger delete-draft-button" data-job-id="${window.appUtils.escapeHtml(job.id)}">Delete</button>
+          </div>
         </article>
       `;
     }).join("");
@@ -355,6 +358,24 @@ document.addEventListener("DOMContentLoaded", async function () {
           activePhotoDraft = job.draft;
           renderPhotoDraft(activePhotoDraft);
           window.appUtils.setMessage(photoStatus, "Processed draft loaded. Review it before adding to workout.", "success");
+        }
+      });
+    });
+
+    processedDraftsList.querySelectorAll(".delete-draft-button").forEach(function (button) {
+      button.addEventListener("click", async function () {
+        const confirmed = window.confirm("Delete this draft and its uploaded media?");
+        if (!confirmed) {
+          return;
+        }
+
+        try {
+          await window.appUtils.deleteJSON(`/api/photo-drafts/${button.dataset.jobId}`);
+          clearPhotoDraft();
+          window.appUtils.setMessage(photoStatus, "Draft deleted.", "success");
+          await loadProcessedDrafts();
+        } catch (error) {
+          window.appUtils.setMessage(photoStatus, error.message, "error");
         }
       });
     });
