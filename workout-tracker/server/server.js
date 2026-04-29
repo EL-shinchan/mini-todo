@@ -7,6 +7,7 @@ const workoutsRouter = require("./routes/workouts");
 const progressRouter = require("./routes/progress");
 const prsRouter = require("./routes/prs");
 const photoDraftsRouter = require("./routes/photoDrafts");
+const configRouter = require("./routes/config");
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
@@ -24,6 +25,7 @@ app.use("/api/workouts", workoutsRouter);
 app.use("/api/progress", progressRouter);
 app.use("/api/prs", prsRouter);
 app.use("/api/photo-drafts", photoDraftsRouter);
+app.use("/api/config", configRouter);
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(publicDir, "index.html"));
