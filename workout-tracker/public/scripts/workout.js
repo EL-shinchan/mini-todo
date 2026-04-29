@@ -256,7 +256,14 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   function addDraftToWorkout() {
     const draft = collectPhotoDraftEdits();
-    const validExercises = draft.exercises.filter(function (exercise) {
+    const validExercises = draft.exercises.map(function (exercise) {
+      return {
+        ...exercise,
+        sets: exercise.sets.filter(function (set) {
+          return Number(set.weight) > 0 && Number(set.reps) > 0;
+        })
+      };
+    }).filter(function (exercise) {
       return exercise.name && exercise.sets.some(function (set) {
         return Number(set.weight) > 0 && Number(set.reps) > 0;
       });
@@ -282,6 +289,10 @@ document.addEventListener("DOMContentLoaded", async function () {
       addExerciseCard(exercise);
     });
 
+    if (!workoutTitle.value.trim()) {
+      workoutTitle.value = validExercises.length === 1 ? `${validExercises[0].name} session` : "Imported workout";
+    }
+
     const noteLines = [];
     if (draft.bodyWeight) {
       noteLines.push(`Body weight: ${draft.bodyWeight}${draft.bodyWeightUnit ? " " + draft.bodyWeightUnit : ""}`);
@@ -293,7 +304,13 @@ document.addEventListener("DOMContentLoaded", async function () {
       workoutNotes.value = [workoutNotes.value.trim(), noteLines.join("\n")].filter(Boolean).join("\n\n");
     }
 
-    window.appUtils.setMessage(photoStatus, "Draft added to the workout form. Review once more, then save normally.", "success");
+    clearPhotoDraft();
+    window.appUtils.setMessage(photoStatus, "Draft added to the workout form. Scroll down, review it, then save normally.", "success");
+
+    const newestExercise = exerciseList.lastElementChild;
+    if (newestExercise) {
+      newestExercise.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
   }
 
   function clearPhotoDraft() {
