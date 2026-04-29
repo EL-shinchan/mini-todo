@@ -1001,3 +1001,231 @@ textarea {
   background: rgba(0, 0, 0, 0.32);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
+
+/* Mobile comfort pass: the app has grown into a real training tool, so phone layout needs more breathing room. */
+@media (max-width: 720px) {
+  body {
+    background: linear-gradient(160deg, #05070a, #0c0f14 55%, #090b10);
+  }
+
+  body::before,
+  .grain {
+    opacity: 0.05;
+  }
+
+  .topbar {
+    position: sticky;
+    padding: 12px 12px 10px;
+    gap: 10px;
+  }
+
+  .brand {
+    font-size: 30px;
+  }
+
+  .nav {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 8px;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+
+  .nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav a {
+    flex: 0 0 auto;
+    min-width: max-content;
+    padding: 9px 12px;
+    font-size: 13px;
+  }
+
+  .shell {
+    width: 100%;
+    padding: 18px 10px 32px;
+  }
+
+  .page-intro {
+    padding: 4px 6px 0;
+  }
+
+  .page-intro h1,
+  h1 {
+    font-size: clamp(42px, 15vw, 58px);
+    line-height: 0.98;
+  }
+
+  h2 {
+    font-size: 23px;
+  }
+
+  h3 {
+    font-size: 18px;
+    line-height: 1.25;
+  }
+
+  .hero-copy {
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  .content-grid,
+  .hero-stat-stack,
+  .stats-grid,
+  .stack-list,
+  .exercise-list {
+    gap: 12px;
+  }
+
+  .panel,
+  .hero-panel,
+  .exercise-card,
+  .photo-draft-review,
+  .quick-clarify-card {
+    border-radius: 20px;
+  }
+
+  .panel,
+  .hero-panel {
+    padding: 16px;
+  }
+
+  .panel-header {
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .form-grid,
+  .quick-clarify-fields,
+  .photo-upload-grid,
+  .photo-draft-set,
+  .set-row {
+    grid-template-columns: 1fr !important;
+    gap: 10px;
+  }
+
+  .photo-upload-panel {
+    overflow: visible;
+  }
+
+  .photo-drop-zone {
+    min-height: auto;
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .photo-drop-zone strong {
+    font-size: 18px;
+  }
+
+  .photo-drop-icon,
+  .quick-number,
+  .set-badge {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    border-radius: 14px;
+  }
+
+  .photo-preview-card,
+  .photo-preview-card img {
+    min-height: 160px;
+  }
+
+  .video-preview {
+    max-height: 240px;
+  }
+
+  .quick-clarify-card,
+  .photo-draft-review,
+  .photo-draft-exercise,
+  .processed-draft-card,
+  .exercise-card,
+  .set-row {
+    padding: 14px;
+  }
+
+  input,
+  select,
+  textarea,
+  .button,
+  .icon-button {
+    font-size: 16px;
+  }
+
+  input,
+  select,
+  textarea {
+    padding: 13px 14px;
+    border-radius: 14px;
+  }
+
+  .button,
+  .icon-button {
+    min-height: 48px;
+    padding: 13px 14px;
+    border-radius: 14px;
+  }
+
+  .form-actions,
+  .photo-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .sticky-actions {
+    position: sticky;
+    bottom: 8px;
+    padding-top: 8px;
+    background: linear-gradient(180deg, transparent, rgba(9, 11, 16, 0.9) 30%);
+  }
+
+  .processed-draft-card,
+  .detail-set-item,
+  .metric-row,
+  .tag-row,
+  .highlight-row,
+  .status-title-row {
+    align-items: stretch;
+  }
+
+  .metric-pill,
+  .info-pill,
+  .pr-badge {
+    width: fit-content;
+    max-width: 100%;
+  }
+
+  .config-json-preview {
+    max-height: 360px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 420px) {
+  .shell {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .panel,
+  .hero-panel {
+    padding: 14px;
+  }
+
+  .photo-upload-panel .panel-header .info-pill {
+    align-self: flex-start;
+  }
+
+  .mini-label,
+  .eyebrow,
+  .stat-label,
+  .detail-label {
+    letter-spacing: 1.1px;
+    font-size: 11px;
+  }
+}
