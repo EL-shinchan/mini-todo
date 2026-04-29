@@ -7,14 +7,18 @@ document.addEventListener("DOMContentLoaded", async function () {
   const addExerciseButton = document.getElementById("addExerciseButton");
   const formStatus = document.getElementById("formStatus");
   const workoutPhotoInput = document.getElementById("workoutPhotoInput");
+  const workoutVideoInput = document.getElementById("workoutVideoInput");
+  const videoPreview = document.getElementById("videoPreview");
   const photoQuickNote = document.getElementById("photoQuickNote");
   const photoClarifyExercise = document.getElementById("photoClarifyExercise");
   const photoClarifyWeight = document.getElementById("photoClarifyWeight");
   const photoClarifyReps = document.getElementById("photoClarifyReps");
   const photoClarifyBodyWeight = document.getElementById("photoClarifyBodyWeight");
+  const videoClarifySetNumber = document.getElementById("videoClarifySetNumber");
   const photoPreviewCard = document.getElementById("photoPreviewCard");
   const photoPreview = document.getElementById("photoPreview");
   const extractPhotoButton = document.getElementById("extractPhotoButton");
+  const queueVideoButton = document.getElementById("queueVideoButton");
   const refreshDraftsButton = document.getElementById("refreshDraftsButton");
   const discardPhotoDraftButton = document.getElementById("discardPhotoDraftButton");
   const photoStatus = document.getElementById("photoStatus");
@@ -316,8 +320,8 @@ document.addEventListener("DOMContentLoaded", async function () {
       return `
         <article class="processed-draft-card">
           <div>
-            <p class="mini-label">${window.appUtils.escapeHtml(window.appUtils.formatDate(job.processedAt || job.uploadedAt))}</p>
-            <h3>${window.appUtils.escapeHtml(job.originalName || "Workout photo")}</h3>
+            <p class="mini-label">${window.appUtils.escapeHtml(window.appUtils.formatDate(job.processedAt || job.uploadedAt))} • ${window.appUtils.escapeHtml(job.mediaType || "image")}</p>
+            <h3>${window.appUtils.escapeHtml(job.originalName || "Workout media")}</h3>
             <p class="highlight-copy">${exerciseCount} exercise${exerciseCount === 1 ? "" : "s"} detected${job.draft.bodyWeight ? ` • body weight ${window.appUtils.escapeHtml(String(job.draft.bodyWeight))}${window.appUtils.escapeHtml(job.draft.bodyWeightUnit || "kg")}` : ""}</p>
           </div>
           <button type="button" class="button button-ghost load-processed-draft-button" data-job-id="${window.appUtils.escapeHtml(job.id)}">Review draft</button>
@@ -355,6 +359,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     formData.append("weight", photoClarifyWeight.value.trim());
     formData.append("reps", photoClarifyReps.value.trim());
     formData.append("bodyWeight", photoClarifyBodyWeight.value.trim());
+    formData.append("setNumber", videoClarifySetNumber.value.trim());
   }
 
   function collectSets(card, exerciseIndex) {
@@ -497,6 +502,28 @@ document.addEventListener("DOMContentLoaded", async function () {
     window.appUtils.setMessage(photoStatus, `Selected ${file.name}. Queue it when ready.`, "success");
   });
 
+  workoutVideoInput.addEventListener("change", function () {
+    const file = workoutVideoInput.files && workoutVideoInput.files[0];
+    clearPhotoDraft();
+
+    if (!file) {
+      videoPreview.classList.add("hidden");
+      videoPreview.removeAttribute("src");
+      window.appUtils.setMessage(photoStatus, "No video selected yet.", null);
+      return;
+    }
+
+    if (!file.type.startsWith("video/")) {
+      videoPreview.classList.add("hidden");
+      window.appUtils.setMessage(photoStatus, "Choose a video file.", "error");
+      return;
+    }
+
+    videoPreview.src = URL.createObjectURL(file);
+    videoPreview.classList.remove("hidden");
+    window.appUtils.setMessage(photoStatus, `Selected ${file.name}. Queue the video when ready.`, "success");
+  });
+
   extractPhotoButton.addEventListener("click", async function () {
     const file = workoutPhotoInput.files && workoutPhotoInput.files[0];
 
@@ -531,6 +558,43 @@ document.addEventListener("DOMContentLoaded", async function () {
       window.appUtils.setMessage(photoStatus, error.message, "error");
     } finally {
       extractPhotoButton.disabled = false;
+    }
+  });
+
+  queueVideoButton.addEventListener("click", async function () {
+    const file = workoutVideoInput.files && workoutVideoInput.files[0];
+
+    if (!file) {
+      window.appUtils.setMessage(photoStatus, "Choose an exercise video first.", "error");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("video", file);
+    appendClarification(formData);
+
+    try {
+      queueVideoButton.disabled = true;
+      window.appUtils.setMessage(photoStatus, "Queueing video for scheduled processing...", null);
+
+      const response = await fetch("/api/photo-drafts/video", {
+        method: "POST",
+        body: formData
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.message || "Could not queue workout video.");
+      }
+
+      clearPhotoDraft();
+      window.appUtils.setMessage(photoStatus, payload.message || "Video queued. Shinoske will process it at the configured time.", "success");
+      await loadProcessedDrafts();
+    } catch (error) {
+      clearPhotoDraft();
+      window.appUtils.setMessage(photoStatus, error.message, "error");
+    } finally {
+      queueVideoButton.disabled = false;
     }
   });
 

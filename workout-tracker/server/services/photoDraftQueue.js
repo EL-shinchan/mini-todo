@@ -33,26 +33,29 @@ function cleanText(value) {
   return String(value || "").trim();
 }
 
-function createQueuedDraftJob(file, clarification = {}) {
+function createQueuedDraftJob(file, clarification = {}, mediaType = "image") {
   ensureQueueDirs();
   const id = createJobId();
-  const extension = path.extname(file.originalname || "").toLowerCase() || ".jpg";
-  const imagePath = path.join(uploadDir, `${id}${extension}`);
+  const extension = path.extname(file.originalname || "").toLowerCase() || (mediaType === "video" ? ".mov" : ".jpg");
+  const mediaPath = path.join(uploadDir, `${id}${extension}`);
 
-  fs.renameSync(file.path, imagePath);
+  fs.renameSync(file.path, mediaPath);
 
   const job = {
     id,
     status: "pending",
+    mediaType,
     uploadedAt: new Date().toISOString(),
-    originalName: file.originalname || "workout-photo",
+    originalName: file.originalname || (mediaType === "video" ? "workout-video" : "workout-photo"),
     mimeType: file.mimetype,
-    imagePath,
+    imagePath: mediaType === "image" ? mediaPath : null,
+    videoPath: mediaType === "video" ? mediaPath : null,
     clarification: {
       quickNote: cleanText(clarification.quickNote),
       exercise: cleanText(clarification.exercise),
       weight: cleanText(clarification.weight),
       reps: cleanText(clarification.reps),
+      setNumber: cleanText(clarification.setNumber),
       bodyWeight: cleanText(clarification.bodyWeight)
     },
     draft: null,
@@ -77,6 +80,7 @@ function publicJob(job) {
     id: job.id,
     status: job.status,
     uploadedAt: job.uploadedAt,
+    mediaType: job.mediaType || (job.videoPath ? "video" : "image"),
     originalName: job.originalName,
     clarification: job.clarification || null,
     draft: job.draft,

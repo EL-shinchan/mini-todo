@@ -985,3 +985,19 @@ textarea {
   color: #dcffb2;
   white-space: pre-wrap;
 }
+
+.video-upload-card {
+  margin-top: 16px;
+}
+
+.video-drop-zone {
+  min-height: 160px;
+}
+
+.video-preview {
+  width: 100%;
+  max-height: 320px;
+  border-radius: 22px;
+  background: rgba(0, 0, 0, 0.32);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}

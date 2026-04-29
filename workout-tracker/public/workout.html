@@ -115,8 +115,33 @@
           </div>
         </div>
 
+        <section class="quick-clarify-card video-upload-card">
+          <div>
+            <p class="mini-label">Video logging MVP</p>
+            <h3>Upload one-set exercise video</h3>
+            <p class="highlight-copy">Say or type something like <strong>bench press 20kg x 12 set 1</strong>. Video rep count is assistive, not final truth.</p>
+          </div>
+
+          <label class="photo-drop-zone video-drop-zone" for="workoutVideoInput">
+            <span class="photo-drop-icon">🎥</span>
+            <strong>Choose exercise video</strong>
+            <span>One video should show one set. Keep it short if you can.</span>
+            <input type="file" id="workoutVideoInput" accept="video/*" capture="environment" />
+          </label>
+
+          <video class="video-preview hidden" id="videoPreview" controls muted playsinline></video>
+
+          <div class="form-grid quick-clarify-fields">
+            <label class="field">
+              <span>Set number</span>
+              <input type="number" id="videoClarifySetNumber" min="1" step="1" placeholder="1" />
+            </label>
+          </div>
+        </section>
+
         <div class="form-actions photo-actions">
-          <button type="button" class="button button-secondary" id="extractPhotoButton">Queue photo for 22:00</button>
+          <button type="button" class="button button-secondary" id="extractPhotoButton">Queue photo</button>
+          <button type="button" class="button button-secondary" id="queueVideoButton">Queue video</button>
           <button type="button" class="button button-ghost" id="refreshDraftsButton">Refresh processed drafts</button>
           <button type="button" class="button button-ghost hidden" id="discardPhotoDraftButton">Discard draft</button>
         </div>
