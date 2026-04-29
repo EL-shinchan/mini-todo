@@ -22,6 +22,11 @@ document.addEventListener("DOMContentLoaded", async function () {
   const photoDraftReview = document.getElementById("photoDraftReview");
   const exerciseTemplate = document.getElementById("exerciseTemplate");
   const setTemplate = document.getElementById("setTemplate");
+  const pageTitle = document.querySelector(".page-intro h1");
+  const pageCopy = document.querySelector(".page-intro .hero-copy");
+  const submitButton = workoutForm.querySelector('button[type="submit"]');
+  const params = new URLSearchParams(window.location.search);
+  const editWorkoutId = params.get("edit");
 
   let exercises = [];
   let activePhotoDraft = null;
@@ -125,7 +130,12 @@ document.addEventListener("DOMContentLoaded", async function () {
     exerciseList.appendChild(card);
 
     if (values) {
-      selectExerciseByName(card, values.name);
+      if (values.exerciseId) {
+        select.value = String(values.exerciseId);
+        toggleCustomFields(card);
+      } else {
+        selectExerciseByName(card, values.name);
+      }
       card.querySelector(".exercise-notes").value = values.notes || "";
       card.querySelector(".set-list").innerHTML = "";
       (values.sets || []).forEach(function (set) {
@@ -416,6 +426,36 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
   }
 
+  async function loadWorkoutForEdit(workoutId) {
+    const data = await window.appUtils.getJSON(`/api/workouts/${workoutId}`);
+    const workout = data.workout;
+
+    workoutTitle.value = workout.title || "";
+    workoutDate.value = workout.workoutDate || new Date().toISOString().slice(0, 10);
+    workoutNotes.value = workout.notes || "";
+    exerciseList.innerHTML = "";
+
+    (workout.exercises || []).forEach(function (exercise) {
+      addExerciseCard({
+        exerciseId: exercise.exerciseId,
+        name: exercise.name,
+        notes: exercise.notes || "",
+        sets: exercise.sets || []
+      });
+    });
+
+    if (pageTitle) {
+      pageTitle.textContent = "Edit workout";
+    }
+    if (pageCopy) {
+      pageCopy.textContent = "Fix the saved session, update wrong sets, and save changes without creating a duplicate.";
+    }
+    if (submitButton) {
+      submitButton.textContent = "Save changes";
+    }
+    window.appUtils.setMessage(formStatus, `Editing ${workout.title}.`, "success");
+  }
+
   function buildPrMessage(newPrs) {
     const items = newPrs.map(function (pr) {
       return `<li><strong>${window.appUtils.escapeHtml(pr.exerciseName)}</strong> — ${window.appUtils.formatNumber(pr.weight)} kg</li>`;
@@ -523,6 +563,13 @@ document.addEventListener("DOMContentLoaded", async function () {
         throw new Error("Workout date is required.");
       }
 
+      if (editWorkoutId) {
+        window.appUtils.setMessage(formStatus, "Saving changes...", null);
+        await window.appUtils.putJSON(`/api/workouts/${editWorkoutId}`, payload);
+        window.appUtils.setMessage(formStatus, "Workout updated. Progress and PRs will recalculate from the edited sets.", "success");
+        return;
+      }
+
       window.appUtils.setMessage(formStatus, "Saving workout...", null);
       const response = await window.appUtils.postJSON("/api/workouts", payload);
       const newPrs = Array.isArray(response.newPrs) ? response.newPrs : [];
@@ -542,6 +589,16 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   });
 
-  addExerciseCard();
+  if (editWorkoutId) {
+    try {
+      await loadWorkoutForEdit(editWorkoutId);
+    } catch (error) {
+      window.appUtils.setMessage(formStatus, error.message, "error");
+      addExerciseCard();
+    }
+  } else {
+    addExerciseCard();
+  }
+
   await loadProcessedDrafts();
 });
