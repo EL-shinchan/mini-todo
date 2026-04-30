@@ -19,6 +19,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
 from secrets import token_hex
@@ -64,6 +65,59 @@ def apple_quote(value: str) -> str:
     return value.replace('\\', '\\\\').replace('"', '\\"')
 
 
+
+def photos_library_path() -> Path:
+    return Path.home() / "Pictures" / "Photos Library.photoslibrary"
+
+
+def sqlite_album_items(album: str) -> list[dict[str, str]]:
+    """Fallback for shared albums that Photos AppleScript does not expose as albums."""
+    library = photos_library_path()
+    db_path = library / "database" / "Photos.sqlite"
+    if not db_path.exists():
+        return []
+
+    query = """
+      SELECT
+        asset.ZUUID,
+        asset.ZFILENAME,
+        asset.ZDIRECTORY,
+        asset.ZUNIFORMTYPEIDENTIFIER
+      FROM ZASSET asset
+      JOIN Z_29ASSETS joiner ON joiner.Z_3ASSETS = asset.Z_PK
+      JOIN ZGENERICALBUM album ON album.Z_PK = joiner.Z_29ALBUMS
+      WHERE album.ZTITLE = ?
+      ORDER BY asset.ZADDEDDATE ASC, asset.ZDATECREATED ASC
+    """
+    with sqlite3.connect(db_path) as conn:
+        rows = conn.execute(query, (album,)).fetchall()
+
+    items = []
+    for uuid, filename, directory, uti in rows:
+        filename = filename or f"{uuid}"
+        candidates = []
+        if directory:
+            candidates.extend([
+                library / "originals" / directory / filename,
+                library / "resources" / "derivatives" / directory / filename,
+                library / "scopes" / "cloudsharing" / "data" / directory / filename,
+            ])
+        candidates.extend(library.glob(f"**/{uuid}*"))
+        is_video = "video" in (uti or "").lower() or filename.lower().endswith((".mov", ".mp4", ".m4v"))
+        if is_video:
+            local_path = next((path for path in candidates if path.is_file() and path.suffix.lower() in {".mov", ".mp4", ".m4v"}), None)
+        else:
+            local_path = next((path for path in candidates if path.is_file() and not path.name.endswith(".plist") and "poster" not in path.name.lower()), None)
+        poster_path = next((path for path in candidates if path.is_file() and "poster" in path.name.lower()), None)
+        items.append({
+            "id": uuid,
+            "filename": filename,
+            "uti": uti or "",
+            "localPath": str(local_path) if local_path else "",
+            "posterPath": str(poster_path) if poster_path else "",
+        })
+    return items
+
 def load_seen() -> set[str]:
     if not SEEN_PATH.exists():
         return set()
@@ -101,7 +155,12 @@ tell application "Photos"
   return outputLines as text
 end tell
 '''
-    output = run_osascript(script)
+    try:
+        output = run_osascript(script)
+    except RuntimeError as error:
+        if "Album not found" in str(error):
+            return sqlite_album_items(album)
+        raise
     items = []
     for line in output.splitlines():
         if not line.strip():
@@ -210,8 +269,14 @@ def import_album(album: str, limit: int) -> list[dict]:
         if item["id"] in seen:
             continue
 
-        item_export_dir = EXPORT_DIR / re.sub(r"[^A-Za-z0-9_.-]", "_", item["id"])
-        exported_files = export_item(album, item["id"], item_export_dir)
+        if item.get("localPath"):
+            exported_files = [Path(item["localPath"])]
+        elif item.get("uti", "").lower().startswith("public.mpeg") or "video" in item.get("uti", "").lower() or item.get("filename", "").lower().endswith((".mov", ".mp4", ".m4v")):
+            print(json.dumps({"warning": "Video original is not downloaded locally yet", "id": item["id"], "filename": item.get("filename")}), file=sys.stderr)
+            continue
+        else:
+            item_export_dir = EXPORT_DIR / re.sub(r"[^A-Za-z0-9_.-]", "_", item["id"])
+            exported_files = export_item(album, item["id"], item_export_dir)
         if not exported_files:
             continue
 
