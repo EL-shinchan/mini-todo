@@ -6,3 +6,4 @@ workout-tracker/.env
 workout-tracker/.env.local
 workout-tracker/data/photo-drafts/
 workout-tracker/data/config.json
+workout-tracker/data/icloud-import/

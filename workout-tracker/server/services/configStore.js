@@ -10,7 +10,8 @@ const defaultConfig = {
     time: "22:00",
     timezone: "Asia/Shanghai",
     frequency: "daily",
-    cronJobId: "3787c796-7724-437d-afa7-daa94b3ce573"
+    cronJobId: "3787c796-7724-437d-afa7-daa94b3ce573",
+    importCronJobId: "2d06e4fb-983a-4842-9444-833f855243ed"
   }
 };
 
@@ -73,6 +74,10 @@ function validatePhotoProcessor(input) {
     throw new Error("Missing OpenClaw cron job id.");
   }
 
+  if (!next.importCronJobId) {
+    throw new Error("Missing OpenClaw import cron job id.");
+  }
+
   return next;
 }
 
@@ -81,28 +86,45 @@ function timeToCron(time) {
   return `${Number(minute)} ${Number(hour)} * * *`;
 }
 
+function timeMinusMinutes(time, minutesToSubtract) {
+  const [hour, minute] = time.split(":").map(Number);
+  const totalMinutes = (hour * 60 + minute - minutesToSubtract + 24 * 60) % (24 * 60);
+  const nextHour = Math.floor(totalMinutes / 60);
+  const nextMinute = totalMinutes % 60;
+  return `${String(nextHour).padStart(2, "0")}:${String(nextMinute).padStart(2, "0")}`;
+}
+
 function openclawBin() {
   return process.env.OPENCLAW_BIN || "/opt/homebrew/bin/openclaw";
 }
 
-function syncPhotoProcessorCron(photoProcessor) {
+function runCronEdit(jobId, cronExpr, timezone, enabled) {
   const args = [
     "cron",
     "edit",
-    photoProcessor.cronJobId,
+    jobId,
     "--cron",
-    timeToCron(photoProcessor.time),
+    cronExpr,
     "--tz",
-    photoProcessor.timezone,
-    photoProcessor.enabled ? "--enable" : "--disable"
+    timezone,
+    enabled ? "--enable" : "--disable"
   ];
 
+  execFileSync(openclawBin(), args, {
+    cwd: path.join(__dirname, "../../.."),
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"]
+  });
+}
+
+function syncPhotoProcessorCron(photoProcessor) {
+  const processCronExpr = timeToCron(photoProcessor.time);
+  const importTime = timeMinusMinutes(photoProcessor.time, 5);
+  const importCronExpr = timeToCron(importTime);
+
   try {
-    execFileSync(openclawBin(), args, {
-      cwd: path.join(__dirname, "../../.."),
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "pipe"]
-    });
+    runCronEdit(photoProcessor.importCronJobId, importCronExpr, photoProcessor.timezone, photoProcessor.enabled);
+    runCronEdit(photoProcessor.cronJobId, processCronExpr, photoProcessor.timezone, photoProcessor.enabled);
   } catch (error) {
     const stderr = error.stderr ? String(error.stderr).trim() : "";
     const stdout = error.stdout ? String(error.stdout).trim() : "";
@@ -110,8 +132,10 @@ function syncPhotoProcessorCron(photoProcessor) {
   }
 
   return {
+    importCronJobId: photoProcessor.importCronJobId,
+    importCronExpr,
     cronJobId: photoProcessor.cronJobId,
-    cronExpr: timeToCron(photoProcessor.time),
+    cronExpr: processCronExpr,
     timezone: photoProcessor.timezone,
     enabled: photoProcessor.enabled
   };
@@ -135,5 +159,6 @@ module.exports = {
   readConfig,
   updatePhotoProcessorConfig,
   configPath,
-  timeToCron
+  timeToCron,
+  timeMinusMinutes
 };
