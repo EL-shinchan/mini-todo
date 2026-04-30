@@ -125,6 +125,8 @@ function publicJob(job) {
     uploadedAt: job.uploadedAt,
     mediaType: job.mediaType || (job.videoPath ? "video" : "image"),
     originalName: job.originalName,
+    source: job.source || null,
+    sourceAlbum: job.sourceAlbum || null,
     clarification: job.clarification || null,
     draft: job.draft,
     error: job.error,

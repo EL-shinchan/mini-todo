@@ -31,6 +31,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const submitButton = workoutForm.querySelector('button[type="submit"]');
   const params = new URLSearchParams(window.location.search);
   const editWorkoutId = params.get("edit");
+  const draftToLoadId = params.get("draft");
 
   let exercises = [];
   let activePhotoDraft = null;
@@ -354,11 +355,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         const job = processedJobs.find(function (candidate) {
           return candidate.id === button.dataset.jobId;
         });
-        if (job && job.draft) {
-          activePhotoDraft = job.draft;
-          renderPhotoDraft(activePhotoDraft);
-          window.appUtils.setMessage(photoStatus, "Processed draft loaded. Review it before adding to workout.", "success");
-        }
+        loadDraftIntoReview(job);
       });
     });
 
@@ -384,10 +381,22 @@ document.addEventListener("DOMContentLoaded", async function () {
   async function loadProcessedDrafts() {
     try {
       const data = await window.appUtils.getJSON("/api/photo-drafts?status=processed");
-      renderProcessedDrafts(data.jobs || []);
+      const jobs = data.jobs || [];
+      renderProcessedDrafts(jobs);
+      return jobs;
     } catch (error) {
       processedDraftsList.classList.add("empty-message");
       processedDraftsList.textContent = error.message;
+      return [];
+    }
+  }
+
+  function loadDraftIntoReview(job) {
+    if (job && job.draft) {
+      activePhotoDraft = job.draft;
+      renderPhotoDraft(activePhotoDraft);
+      window.appUtils.setMessage(photoStatus, "Processed draft loaded. Review it before adding to workout.", "success");
+      photoDraftReview.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }
 
@@ -702,5 +711,15 @@ document.addEventListener("DOMContentLoaded", async function () {
     addExerciseCard();
   }
 
-  await loadProcessedDrafts();
+  const processedJobs = await loadProcessedDrafts();
+  if (draftToLoadId) {
+    const draftJob = processedJobs.find(function (job) {
+      return job.id === draftToLoadId;
+    });
+    if (draftJob) {
+      loadDraftIntoReview(draftJob);
+    } else {
+      window.appUtils.setMessage(photoStatus, "That processed draft was not found. It may have been deleted or already imported.", "error");
+    }
+  }
 });
